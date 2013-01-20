@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Plugin Name: WP Download Seller
+ * Plugin Name: WP Plugin Packer
  * Plugin URI: http://david-coombes.com
- * Description: Plugin for managing file downloads before, during and after sale.
+ * Description: Plugin for managing file zip downloads before, during and after sale.
  * Author: David Coombes http://david-coombes.com
  * Version: 0.1
  * Author URI: http://david-coombes.com
@@ -15,7 +15,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', 'on');
 
 //includes
-require_once( dirname(__FILE__) . '/application/includes/debug.func.php');
+require_once('debug.func.php');
 
 //vars
 $action = @$_REQUEST['wp-download-action'];
