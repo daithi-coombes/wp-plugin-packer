@@ -4,7 +4,7 @@
  * Plugin Name: WP Plugin Packer
  * Plugin URI: http://david-coombes.com
  * Description: Plugin for managing file zip downloads before, during and after sale.
- * Author: David Coombes http://david-coombes.com
+ * Author: Daithi Coombes http://david-coombes.com
  * Version: 0.1
  * Author URI: http://david-coombes.com
  * 
