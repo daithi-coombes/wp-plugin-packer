@@ -17,6 +17,54 @@ ini_set('display_errors', 'on');
 //includes
 require_once('debug.func.php');
 
+/**
+ * Globals
+ */
+//constants
+define('WPDOWNLOAD_DIR', dirname(__FILE__));
+//end Globals
+
+
+/**
+ * class autoloader
+ */
+spl_autoload_register("wpdownload_autoload");
+/**
+ * WP Download Autoloader
+ * @param string $class The class name to try loading
+ * @package WPDownloader
+ */
+function wpdownload_autoload($class){
+	@include "modules/{$class}.class.php";
+}
+//end autoloader
+
+
+/**
+ * Construction
+ */
+//logging
+if(!class_exists("Logger"))
+	require_once( WPDOWNLOAD_DIR . "/includes/apache-log4php-2.3.0/Logger.php");
+/** @var Logger The log4php logger global */
+//Logger::configure(WPDOWNLOAD_DIR . '/Log4php.config.xml');
+$wppp_logger = Logger::getLogger("wp-plugin-packer");
+$wppp_logger->configure(WPDOWNLOAD_DIR . '/Log4php.config.xml');
+//end logging
+$updater = new WPDownload_Update();
+//end constructors
+
+
+/**
+ * Actions, hooks and filters 
+ */
+add_action('wp_ajax_wp-plugin-packer_update', array(&$updater, 'stdin'));
+add_action('wp_ajax_nopriv_wp-plugin-packer_update', array(&$updater, 'stdin'));
+//end actions, hooks and filters
+
+/**
+ * @deprecated Moved to WPDownload_Packer 
+ *
 //vars
 $action = @$_REQUEST['wp-download-action'];
 $plugin_folder = WP_PLUGIN_DIR . "/wp-cron";
@@ -61,7 +109,7 @@ function foo_copy_directory($source, $destination){
 
 /**
  * 
- */
+ *
 function copy_directory($source, $destination) {
 	if (is_dir($source)) {
 		@mkdir($destination);
@@ -95,7 +143,7 @@ function copy_directory($source, $destination) {
 
 /**
  * 
- */
+ *
 function rand_md5($length) {
 	$max = ceil($length / 32);
 	$random = '';
@@ -104,3 +152,6 @@ function rand_md5($length) {
 	}
 	return substr($random, 0, $length);
 }
+ * 
+ */
+//end @deprecated
