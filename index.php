@@ -50,6 +50,8 @@ if(!class_exists("Logger"))
 //Logger::configure(WPDOWNLOAD_DIR . '/Log4php.config.xml');
 $wppp_logger = Logger::getLogger("wp-plugin-packer");
 $wppp_logger->configure(WPDOWNLOAD_DIR . '/Log4php.config.xml');
+//$wppp_logger->info("Request:");
+//$wppp_logger->info($_REQUEST);
 //end logging
 $updater = new WPDownload_Update();
 //end constructors
@@ -58,8 +60,7 @@ $updater = new WPDownload_Update();
 /**
  * Actions, hooks and filters 
  */
-add_action('wp_ajax_wp-plugin-packer_update', array(&$updater, 'stdin'));
-add_action('wp_ajax_nopriv_wp-plugin-packer_update', array(&$updater, 'stdin'));
+add_action('plugins_loaded', array(&$updater, 'stdin'));	//look for plugin update requests (admin-ajax won't work because request var action used by updater)
 //end actions, hooks and filters
 
 /**
