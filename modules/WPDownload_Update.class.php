@@ -56,7 +56,12 @@ class WPDownload_Update {
 						'another_section' => 'This is another section',
 						'changelog' => 'Some new features'
 					);
-					$obj->download_link = 'http://localhost/update.php';
+					$obj->download_link = 'http://wordpress-schedule-post.com/wp-admin/admin-ajax.php?' . http_build_query(array(
+						'action' => 'wp-plugin-packer_download',
+						'key' => $dto->key,
+						'slug' => 'wpcron/index.php',
+						'verson' => '0.2'
+					));
 					$this->log("Request for information:");
 					$this->log($obj);
 				case 'license':

@@ -24,7 +24,6 @@ class WPDownload {
 		 * Bootstrap
 		 */
 		$dto = new WPDownload_DTO();
-		$this->log($dto);
 		if(!$dto->check_key($_REQUEST['key']))
 			return false;
 		//end bootstrap		
