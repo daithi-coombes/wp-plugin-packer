@@ -13,6 +13,7 @@
 //debug?
 error_reporting(E_ALL);
 ini_set('display_errors', 'on');
+set_error_handler("wppp_error_handler");
 
 //includes
 require_once('debug.func.php');
@@ -21,6 +22,11 @@ require_once('debug.func.php');
  * Globals
  */
 //constants
+global $wpdb;
+global $wppp_tables;
+$wppp_tables = (object) array(
+	'client' => "{$wpdb->prefix}wppp_client"
+);
 define('WPDOWNLOAD_DIR', dirname(__FILE__));
 //end Globals
 
@@ -39,7 +45,6 @@ function wpdownload_autoload($class){
 }
 //end autoloader
 
-
 /**
  * Construction
  */
@@ -47,16 +52,15 @@ function wpdownload_autoload($class){
 if(!class_exists("Logger"))
 	require_once( WPDOWNLOAD_DIR . "/includes/apache-log4php-2.3.0/Logger.php");
 /** @var Logger The log4php logger global */
-global $wpdb;
-$wppp_logger = Logger::getLogger("wp-plugin-packer");
+$wppp_logger = Logger::getLogger("wppp");
 $wppp_logger->configure(WPDOWNLOAD_DIR . '/Log4php.config.xml');
-$wppp_tables = (object) array(
-	'client' => "{$wpdb->prefix}wppp_client"
-);
+$wppp_logger->info("Wordpresss Plugin Packager started");
+//end logging
+
+//plugin classes
 $download = new WPDownload();
 $updater = new WPDownload_Update();
 //end constructors
-
 
 /**
  * Actions, hooks and filters 
@@ -72,7 +76,7 @@ function wp_plugin_packer_activate(){
 	require_once( ABSPATH . '/wp-admin/includes/upgrade.php');
 	
 	global $wpdb;
-	$table = $wpdb->prefix . "wp_wppp_client";
+	$table = $wpdb->prefix . "wppp_client";
 	$sql = "
 		CREATE TABLE IF NOT EXISTS `{$table}` (
 		`id` int(11) NOT NULL AUTO_INCREMENT,
@@ -82,4 +86,6 @@ function wp_plugin_packer_activate(){
 		) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 		";
 	dbDelta($sql);
+}
+function wppp_error_handler($errno, $errstr, $errfile, $errline){	
 }
