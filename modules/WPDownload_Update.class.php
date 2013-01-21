@@ -24,8 +24,6 @@ class WPDownload_Update {
 		 * Bootstrap
 		 */
 		$dto = new WPDownload_DTO();
-		$this->log("WPDownload_DTO::stdin():");
-		$this->log($dto);
 		if(!$dto->key)
 			return false;
 		//end bootstrap
@@ -35,7 +33,7 @@ class WPDownload_Update {
 		 * Update Actions 
 		 */
 		if (isset($_POST['action'])) {
-			$this->log($_POST);
+			
 			switch ($_POST['action']) {
 				case 'version':
 					echo '1.1';
@@ -62,8 +60,6 @@ class WPDownload_Update {
 						'slug' => 'wpcron/index.php',
 						'verson' => '0.2'
 					));
-					$this->log("Request for information:");
-					$this->log($obj);
 				case 'license':
 					echo 'false';
 					break;
