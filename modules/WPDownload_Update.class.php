@@ -97,9 +97,7 @@ class WPDownload_DTO{
 		$this->tables = $wppp_tables;
 		$this->response = $_REQUEST;
 		
-		//check key
-		if(@$_REQUEST['key'])
-			$this->check_key();
+		$this->check_key();
 	}
 	
 	/**
@@ -107,16 +105,10 @@ class WPDownload_DTO{
 	 * @global wpdb
 	 * @return boolean 
 	 */
-	private function check_key(){
+	public function check_key($key){
 		
 		global $wpdb;
-		
-		//check key exists
-		if(@$_REQUEST['key']){
-			$this->key = $_REQUEST['key'];
-			return true;
-		}
-		else return false;
+		$this->key = $key;
 		
 		$res = $wpdb->get_results($wpdb->prepare("
 			SELECT * FROM {$wpdb->prefix}{$this->tables->client}
