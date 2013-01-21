@@ -14,7 +14,7 @@ class WPDownload_Update {
 
 		global $wppp_logger;
 		$this->logger = $wppp_logger;
-		$this->version = "0.2";
+		$this->version = "0.3";
 	}
 
 	/**
