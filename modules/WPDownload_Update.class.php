@@ -94,7 +94,7 @@ class WPDownload_Update_DTO{
 		$this->response = $_REQUEST;
 		
 		//check key
-		if($_REQUEST['key'])
+		if(@$_REQUEST['key'])
 			$this->check_key();
 	}
 	
@@ -103,8 +103,11 @@ class WPDownload_Update_DTO{
 	 * @return boolean 
 	 */
 	private function check_key(){
-		$this->key = $_REQUEST['key'];
-		return true;
+		if(@$_REQUEST['key']){
+			$this->key = $_REQUEST['key'];
+			return true;
+		}
+		return false;
 	}
 }
 ?>
