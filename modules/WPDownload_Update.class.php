@@ -24,6 +24,8 @@ class WPDownload_Update {
 		 * Bootstrap
 		 */
 		$dto = new WPDownload_DTO();
+		$this->log("WPDownload_DTO::stdin():");
+		$this->log($dto);
 		if(!$dto->key)
 			return false;
 		//end bootstrap
@@ -97,7 +99,7 @@ class WPDownload_DTO{
 		$this->tables = $wppp_tables;
 		$this->response = $_REQUEST;
 		
-		$this->check_key();
+		$this->check_key($_REQUEST['key']);
 	}
 	
 	/**
