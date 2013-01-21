@@ -14,7 +14,7 @@ class WPDownload_Update {
 
 		global $wppp_logger;
 		$this->logger = $wppp_logger;
-		$this->version = "0.4";
+		$this->version = "0.2";
 	}
 
 	/**
@@ -25,9 +25,14 @@ class WPDownload_Update {
 		/**
 		 * Bootstrap
 		 */
-		$dto = new WPDownload_DTO();
+		//check action
+		$actions = array('version','info','license');
+		if(!in_array(@$_POST['action'], $actions))
+			return;
+		
+		//check key
 		if(!$dto->key)
-			return false;
+			die(json_encode(array('error'=>'invalid key', 'data'=>$_REQUEST)));
 		//end bootstrap
 		
 		
@@ -43,36 +48,35 @@ class WPDownload_Update {
 					$this->log("Server Response: {$this->version}");
 					break;
 				case 'info':
-					$obj = new stdClass();
-					$obj->slug = 'wpcron/index.php';
-					$obj->plugin_name = 'WP Cron';
-					$obj->new_version = $this->version;
-					$obj->requires = '3.0';
-					$obj->tested = '3.3.1';
-					$obj->downloaded = 12540;
-					$obj->last_updated = '2012-01-12';
-					$obj->sections = array(
+					$res = new stdClass();
+					$res->slug = 'wpcron/index.php';
+					$res->plugin_name = 'WP Cron';
+					$res->new_version = $this->version;
+					$res->requires = '3.0';
+					$res->tested = '3.3.1';
+					$res->downloaded = 12540;
+					$res->last_updated = '2012-01-12';
+					$res->sections = array(
 						'description' => 'The new version of the Auto-Update plugin',
 						'another_section' => 'This is another section',
 						'changelog' => 'Some new features'
 					);
-					$obj->download_link = 'http://wordpress-schedule-post.com/wp-admin/admin-ajax.php?' . http_build_query(array(
+					$res->download_link = 'http://wordpress-schedule-post.com/wp-admin/admin-ajax.php?' . http_build_query(array(
 						'action' => 'wp-plugin-packer_download',
 						'key' => $dto->key,
 						'slug' => 'wpcron/index.php',
 						'verson' => '0.2'
 					));
+					die();
 				case 'license':
 					echo 'false';
 					break;
 			}
-		} else {
-			return;
-			header('Cache-Control: public');
-			header('Content-Description: File Transfer');
-			header('Content-Type: application/zip');
-			readfile('update.zip');
 		}
+		
+		//print response and die
+		echo json_encode($res);
+		die();
 	}
 
 	/**
