@@ -63,98 +63,22 @@ $updater = new WPDownload_Update();
  */
 add_action('plugins_loaded', array(&$updater, 'stdin'));	//look for plugin update requests (admin-ajax won't work because request var action used by updater)
 add_action('wp_ajax_nopriv_wp-plugin-packer_download', array(&$download, 'stdin'));
+register_activation_hook(__FILE__, "wp_plugin_packer_activate");
 //end actions, hooks and filters
 
-/**
- * @deprecated Moved to WPDownload_Packer 
- *
-//vars
-$action = @$_REQUEST['wp-download-action'];
-$plugin_folder = WP_PLUGIN_DIR . "/wp-cron";
-$plugin_file = $plugin_folder . "/index.php";
-$plugin_tmp_dir = WP_CONTENT_DIR . "/uploads/wp-download/";
-$tmp_dirname = time();
-$replace_string = "0akjdfha659374jsdfl732ol87fkLJH87LLSfjhLH";
-$key = rand_md5(32);
-
-//if not downloading exit here
-if ($action == 'download-plugin') {
-
-	//add key to file
-	$file = file_get_contents($plugin_file);
-	$file = preg_replace("/$replace_string/", "$key", $file);
-
-	//create tmp dir's to work in
-	if (!file_exists($plugin_tmp_dir))
-		mkdir($plugin_tmp_dir);
-	while (file_exists("{$plugin_tmp_dir}/{$tmp_dirname}"))
-		$tmp_dirname++;
-	mkdir("$plugin_tmp_dir/{$tmp_dirname}");
-
-	//copy plugin files to tmp dir
-	$plugin_name = dirname($plugin_folder);
-	ar_print("copy => {$plugin_folder}");
-	ar_print("to => {$plugin_tmp_dir}{$tmp_dirname}");
-	copy_directory($plugin_folder, "{$plugin_tmp_dir}{$tmp_dirname}");
-}
-
-function foo_copy_directory($source, $destination){
+function wp_plugin_packer_activate(){
 	
-	//if directory
-	if (is_dir($source)){
-		
-	}
-	//if file
-	else{
-		
-	}
+	require_once( ABSPATH . '/wp-admin/includes/upgrade.php');
+	
+	global $wpdb;
+	$table = $wpdb->prefix . "wp_wppp_client";
+	$sql = "
+		CREATE TABLE IF NOT EXISTS `{$table}` (
+		`id` int(11) NOT NULL AUTO_INCREMENT,
+		`blog` varchar(250) NOT NULL,
+		`key` varchar(250) NOT NULL,
+		PRIMARY KEY (`id`)
+		) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+		";
+	dbDelta($sql);
 }
-
-/**
- * 
- *
-function copy_directory($source, $destination) {
-	if (is_dir($source)) {
-		@mkdir($destination);
-		$directory = dir($source);
-		while (FALSE !== ( $readdirectory = $directory->read() )) {
-			if ($readdirectory == '.' || $readdirectory == '..') {
-				continue;
-			}
-			$PathDir = $source . '/' . $readdirectory;
-			if (is_dir($PathDir)) {
-				copy_directory($PathDir, $destination . '/' . $readdirectory);
-				continue;
-			}
-			copy($PathDir, $destination . '/' . $readdirectory);
-		}
-
-		$directory->close();
-	} else {
-
-		//if file with key then create file
-		ar_print("checking {$plugin_folder}/{$plugin_file}");
-		if ($source == "{$plugin_folder}/{$plugin_file}") {
-			$fp = fopen($destination, "w");
-			fwrite($fp, $file);
-			fclose($fp);
-		}
-		else
-			copy($source, $destination);
-	}
-}
-
-/**
- * 
- *
-function rand_md5($length) {
-	$max = ceil($length / 32);
-	$random = '';
-	for ($i = 0; $i < $max; $i++) {
-		$random .= md5(microtime(true) . mt_rand(10000, 90000));
-	}
-	return substr($random, 0, $length);
-}
- * 
- */
-//end @deprecated
