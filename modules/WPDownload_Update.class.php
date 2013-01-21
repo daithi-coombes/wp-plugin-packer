@@ -100,7 +100,7 @@ class WPDownload_DTO{
 		$this->tables = $wppp_tables;
 		$this->response = $_REQUEST;
 		
-		$this->check_key($_REQUEST['key']);
+		$this->check_key(@$_REQUEST['key']);
 	}
 	
 	/**
