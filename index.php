@@ -48,8 +48,12 @@ if(!class_exists("Logger"))
 	require_once( WPDOWNLOAD_DIR . "/includes/apache-log4php-2.3.0/Logger.php");
 /** @var Logger The log4php logger global */
 //Logger::configure(WPDOWNLOAD_DIR . '/Log4php.config.xml');
+global $wpdb;
 $wppp_logger = Logger::getLogger("wp-plugin-packer");
 $wppp_logger->configure(WPDOWNLOAD_DIR . '/Log4php.config.xml');
+$wppp_tables = (object) array(
+	'client' => "{$wpdb->prefix}wppp_client"
+);
 //$wppp_logger->info("Request:");
 //$wppp_logger->info($_REQUEST);
 //end logging

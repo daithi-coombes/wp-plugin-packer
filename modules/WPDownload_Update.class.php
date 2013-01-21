@@ -23,7 +23,7 @@ class WPDownload_Update {
 		/**
 		 * Bootstrap
 		 */
-		$dto = new WPDownload_Update_DTO();
+		$dto = new WPDownload_DTO();
 		if(!$dto->key)
 			return false;
 		//end bootstrap
@@ -85,12 +85,16 @@ class WPDownload_Update {
 
 }
 
-class WPDownload_Update_DTO{
+class WPDownload_DTO{
 	
 	public $key=false;
 	public $response=array();
+	public $tables;
 	
 	function __construct(){
+		
+		global $wppp_tables;
+		$this->tables = $wppp_tables;
 		$this->response = $_REQUEST;
 		
 		//check key
@@ -100,14 +104,24 @@ class WPDownload_Update_DTO{
 	
 	/**
 	 * Checks $_REQUEST['key'] against db for match
+	 * @global wpdb
 	 * @return boolean 
 	 */
 	private function check_key(){
+		
+		global $wpdb;
+		
+		//check key exists
 		if(@$_REQUEST['key']){
 			$this->key = $_REQUEST['key'];
 			return true;
 		}
-		return false;
+		else return false;
+		
+		$res = $wpdb->get_results($wpdb->prepare("
+			SELECT * FROM {$wpdb->prefix}{$this->tables->client}
+			WHERE key='%s'", array($this->key)));
+		return $res;
 	}
 }
 ?>

@@ -16,8 +16,18 @@ class WPDownload {
 	}
 
 	public function stdin() {
-		$this->log("WPDownload::stdin()");
+		
+		$this->log("WPDownload::stdin():");
 		$this->log($_REQUEST);
+		
+		/**
+		 * Bootstrap
+		 */
+		$dto = new WPDownload_DTO();
+		if(!$dto->key)
+			return false;
+		//end bootstrap		
+		
 	}
 
 	private function pack_plugin() {
