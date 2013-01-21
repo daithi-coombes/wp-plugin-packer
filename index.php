@@ -47,16 +47,12 @@ function wpdownload_autoload($class){
 if(!class_exists("Logger"))
 	require_once( WPDOWNLOAD_DIR . "/includes/apache-log4php-2.3.0/Logger.php");
 /** @var Logger The log4php logger global */
-//Logger::configure(WPDOWNLOAD_DIR . '/Log4php.config.xml');
 global $wpdb;
 $wppp_logger = Logger::getLogger("wp-plugin-packer");
 $wppp_logger->configure(WPDOWNLOAD_DIR . '/Log4php.config.xml');
 $wppp_tables = (object) array(
 	'client' => "{$wpdb->prefix}wppp_client"
 );
-//$wppp_logger->info("Request:");
-//$wppp_logger->info($_REQUEST);
-//end logging
 $download = new WPDownload();
 $updater = new WPDownload_Update();
 //end constructors
@@ -67,6 +63,7 @@ $updater = new WPDownload_Update();
  */
 add_action('plugins_loaded', array(&$updater, 'stdin'));	//look for plugin update requests (admin-ajax won't work because request var action used by updater)
 add_action('wp_ajax_nopriv_wp-plugin-packer_download', array(&$download, 'stdin'));
+add_action('wp_ajax_wp-plugin-packer_download', array(&$download, 'stdin'));
 register_activation_hook(__FILE__, "wp_plugin_packer_activate");
 //end actions, hooks and filters
 

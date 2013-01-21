@@ -7,12 +7,14 @@
  */
 class WPDownload_Update {
 
+	public $version;
 	protected $logger;
 
 	function __construct() {
 
 		global $wppp_logger;
 		$this->logger = $wppp_logger;
+		$this->version = "0.2";
 	}
 
 	/**
@@ -33,7 +35,7 @@ class WPDownload_Update {
 		 * Update Actions 
 		 */
 		if (isset($_POST['action'])) {
-			
+			$this->log("Check Update actions for client {$dto->key}");
 			switch ($_POST['action']) {
 				case 'version':
 					echo '1.1';

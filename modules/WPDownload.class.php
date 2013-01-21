@@ -24,10 +24,12 @@ class WPDownload {
 		 * Bootstrap
 		 */
 		$dto = new WPDownload_DTO();
-		if(!$dto->check_key($_REQUEST['key']))
-			return false;
-		//end bootstrap		
-		
+		if(
+			!@$_REQUEST['key'] ||
+			!$dto->check_key(@$_REQUEST['key'])
+		) die(json_encode(array('error'=>'invalid key','data'=>$_REQUEST)));
+		//end bootstrap
+		die();
 	}
 
 	private function pack_plugin() {
@@ -128,7 +130,6 @@ class WPDownload {
 	 * @return Logger Returns the logger 
 	 */
 	protected function log($msg, $method = 'info') {
-		$this->logger->configure(WPDOWNLOAD_DIR . '/Log4php.config.xml');
 		$this->logger->$method($msg);
 		return $this->logger;
 	}
