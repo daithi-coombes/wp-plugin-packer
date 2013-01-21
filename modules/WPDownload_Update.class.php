@@ -38,15 +38,15 @@ class WPDownload_Update {
 			$this->log("Check Update actions for client {$dto->key}");
 			switch ($_POST['action']) {
 				case 'version':
-					echo '1.1';
+					echo $this->version;
 					$this->log("Request for version");
-					$this->log("Server Response: 1.1");
+					$this->log("Server Response: {$this->version}");
 					break;
 				case 'info':
 					$obj = new stdClass();
 					$obj->slug = 'wpcron/index.php';
 					$obj->plugin_name = 'WP Cron';
-					$obj->new_version = '1.1';
+					$obj->new_version = $this->version;
 					$obj->requires = '3.0';
 					$obj->tested = '3.3.1';
 					$obj->downloaded = 12540;
