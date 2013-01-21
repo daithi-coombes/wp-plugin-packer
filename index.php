@@ -53,6 +53,7 @@ $wppp_logger->configure(WPDOWNLOAD_DIR . '/Log4php.config.xml');
 //$wppp_logger->info("Request:");
 //$wppp_logger->info($_REQUEST);
 //end logging
+$download = new WPDownload();
 $updater = new WPDownload_Update();
 //end constructors
 
@@ -61,6 +62,7 @@ $updater = new WPDownload_Update();
  * Actions, hooks and filters 
  */
 add_action('plugins_loaded', array(&$updater, 'stdin'));	//look for plugin update requests (admin-ajax won't work because request var action used by updater)
+add_action('wp_ajax_nopriv_wp-plugin-packer_download', array(&$download, 'stdin'));
 //end actions, hooks and filters
 
 /**

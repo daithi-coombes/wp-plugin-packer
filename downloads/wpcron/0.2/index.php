@@ -4,7 +4,7 @@
   Plugin URI: http://david-coombes.com
   Description: Automatically run cron jobs
   Author: Daithi Coombes
-  Version: 0.1
+  Version: 0.2
   Author URI: http://david-coombes.com
  */
 
