@@ -200,6 +200,7 @@ class WPDownload {
 	 * @return Logger Returns the logger 
 	 */
 	protected function log($msg, $method = 'info') {
+		return;
 		$this->logger->$method($msg);
 		return $this->logger;
 	}
