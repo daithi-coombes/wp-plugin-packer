@@ -11,7 +11,7 @@ class WPDownload {
 	private $plugin_source;
 
 	function __construct() {
-
+		
 		global $wppp_logger;
 		$this->logger = $wppp_logger;
 		$this->plugin_source = dirname(dirname(__FILE__)) . "/downloads";
@@ -29,19 +29,82 @@ class WPDownload {
 		$dto = new WPDownload_DTO();
 		$plugin = new WPDownload_Plugin($dto);
 
+		//check key
 		if (
 				!@$_REQUEST['key'] ||
 				!$dto->check_key()
-		)
-			die(json_encode(array('error' => 'invalid key', 'data' => $_REQUEST)));
-		$this->log("DTO:");
-		$this->log($dto);
+		) $this->error("Invalid key", $_REQUEST);
 		//end bootstrap
 		
-		$zip = $this->pack_plugin($plugin);
+		
+		/**
+		 * Action
+		 */
+		switch($dto->requests['wp-download-action']){
+			
+			//download a plugin
+			case 'download-plugin':
+				
+				//vars
+				$action = @$_REQUEST['wp-download-action'];
+				if ($plugin->version)
+					$plugin_folder = $this->plugin_source . "/" . $plugin->name . "/" . $plugin->version;
+				else
+					$plugin_folder = $this->plugin_source . "/" . $plugin->name;
+				$plugin_file = $plugin_folder . "/index.php";
+				$plugin_tmp_dir = WP_CONTENT_DIR . "/uploads/wp-download/";
+				$tmp_dirname = time();
+				$replace_string = "e3f8e543e968d7d0390a71bf3c4c2144";
+				$key = $this->rand_md5(32);
+				
+				//create tmp dir's to work in
+				if (!file_exists($plugin_tmp_dir))
+					mkdir($plugin_tmp_dir);
+				while (file_exists("{$plugin_tmp_dir}/{$tmp_dirname}"))
+					$tmp_dirname++;
+				mkdir("$plugin_tmp_dir/{$tmp_dirname}");
+
+				//copy plugin files to tmp dir
+				$this->copy_directory($plugin_folder, "{$plugin_tmp_dir}{$tmp_dirname}");
+
+				//add key to file
+				$file = file_get_contents($plugin_file);
+				$file = preg_replace("/$replace_string/", "$key", $file);
+				file_put_contents("{$plugin_tmp_dir}{$tmp_dirname}/index.php", $file);
+
+				//build zip
+				$tmp_zip = tempnam("tmp", "zip");
+				$this->Zip("{$plugin_tmp_dir}{$tmp_dirname}", $plugin);
+				break;
+				
+			//no action, throw error.
+			default:
+				$this->error("Invalid action", $_REQUEST);
+				break;
+		}
+		//grab zip
+		//$zip = $this->pack_plugin($plugin);
 		die();
 	}
 
+	/**
+	 * Throw an error.
+	 * json encodes error array and die()'s or prints to screen depending on
+	 * the flog $die
+	 * @param string $msg The error message
+	 * @param mixed $data Default array() Can be a string or array of data
+	 * @param boolean $die Default true. Whether to die() or just print error
+	 * @return void
+	 */
+	private function error($msg, $data=array(), $die=true){
+		
+		$error = json_encode(array('error' => $msg, 'data' => $data));
+		if($die)
+			die($error);
+		else
+			print $error;
+	}
+	
 	/**
 	 * Builds zip file of plugin.
 	 * @param WPDownload_Plugin $plugin The plugin object
@@ -62,28 +125,7 @@ class WPDownload {
 		$replace_string = "e3f8e543e968d7d0390a71bf3c4c2144";
 		$key = $this->rand_md5(32);
 
-		//if not downloading exit here
-		if ($action == 'download-plugin') {
 
-			//create tmp dir's to work in
-			if (!file_exists($plugin_tmp_dir))
-				mkdir($plugin_tmp_dir);
-			while (file_exists("{$plugin_tmp_dir}/{$tmp_dirname}"))
-				$tmp_dirname++;
-			mkdir("$plugin_tmp_dir/{$tmp_dirname}");
-
-			//copy plugin files to tmp dir
-			$this->copy_directory($plugin_folder, "{$plugin_tmp_dir}{$tmp_dirname}");
-
-			//add key to file
-			$file = file_get_contents($plugin_file);
-			$file = preg_replace("/$replace_string/", "$key", $file);
-			file_put_contents("{$plugin_tmp_dir}{$tmp_dirname}/index.php", $file);
-			
-			//build zip
-			$tmp_zip = tempnam("tmp", "zip");
-			$this->Zip("{$plugin_tmp_dir}{$tmp_dirname}", $plugin);
-		}
 
 		return false;
 	}
@@ -129,14 +171,16 @@ class WPDownload {
 	 * Streams zip file and die()'s
 	 * @param string $source Path to source folder
 	 * @param string $destination Path to destination temporary folder
-	 * @return boolean
+	 * @return void die()'s
 	 */
-	function Zip($source, $plugin)
-	{
+	function Zip($source, $plugin){
+		
+		//vars
 		error_reporting(0);
 		$zip = new ZipStream("{$plugin->name}.zip");
 		$source = str_replace('\\', '/', realpath($source));
 
+		//if root is directory
 		if (is_dir($source) === true){
 			
 			//loop through files
@@ -156,12 +200,21 @@ class WPDownload {
 					$zip->add_file($filename, file_get_contents($file));
 			}
 		}
+		
+		//if single file
 		else if (is_file($source) === true)
 			$zip->add_file(basename($source), file_get_contents($source));
+		
+		//finish stream and die()
 		$zip->finish();
 		die();
 	}
 
+	/**
+	 * Generate a random string
+	 * @param integer $length The required string length
+	 * @return string Returns the random string
+	 */
 	private function rand_md5($length) {
 		$max = ceil($length / 32);
 		$random = '';
@@ -188,6 +241,9 @@ class WPDownload {
 
 }
 
+/**
+ * WP Download Data Transport Object
+ */
 class WPDownload_DTO {
 
 	public $plugin = "";
