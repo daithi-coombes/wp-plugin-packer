@@ -74,43 +74,9 @@ class WPDownload {
 				//set new key
 				$plugin->set_key();
 				
-				$zip = new WPDownload_Zipfile( $plugin );
-				
+				//build zip and stream
+				$zip = new WPDownload_Zipfile( $plugin );				
 				$zip->stream();
-				die();
-				/**
-				//vars
-				$action = @$_REQUEST['wp-download-action'];
-				if ($plugin->version)
-					$plugin_folder = $this->plugin_source . "/" . $plugin->name . "/" . $plugin->version;
-				else
-					$plugin_folder = $this->plugin_source . "/" . $plugin->name;
-				$plugin_file = $plugin_folder . "/index.php";
-				$plugin_tmp_dir = WP_CONTENT_DIR . "/uploads/wp-download/";
-				$tmp_dirname = time();
-				$replace_string = "e3f8e543e968d7d0390a71bf3c4c2144";
-				$key = $this->rand_md5(32);
-				
-				//create tmp dir's to work in
-				if (!file_exists($plugin_tmp_dir))
-					mkdir($plugin_tmp_dir);
-				while (file_exists("{$plugin_tmp_dir}/{$tmp_dirname}"))
-					$tmp_dirname++;
-				mkdir("$plugin_tmp_dir/{$tmp_dirname}");
-
-				//copy plugin files to tmp dir
-				$this->copy_directory($plugin_folder, "{$plugin_tmp_dir}{$tmp_dirname}");
-
-				//add key to file
-				$file = file_get_contents($plugin_file);
-				$file = preg_replace("/$replace_string/", "$key", $file);
-				file_put_contents("{$plugin_tmp_dir}{$tmp_dirname}/index.php", $file);
-
-				//build zip
-				$tmp_zip = tempnam("tmp", "zip");
-				$this->Zip("{$plugin_tmp_dir}{$tmp_dirname}", $plugin);
-				 * 
-				 */
 				break;
 				
 			//no action, throw error.
@@ -144,7 +110,7 @@ class WPDownload {
 	/**
 	 * Builds zip file of plugin.
 	 * @param WPDownload_Plugin $plugin The plugin object
-	 */
+	 *
 	private function pack_plugin(WPDownload_Plugin $plugin) {
 
 		$this->log("pack_plugin for {$plugin->name}::");
@@ -171,7 +137,7 @@ class WPDownload {
 	 * @deprecated moved to WPDownload_Plugin
 	 * @param string $source The path to the source files
 	 * @param string $destination The path to the destination files
-	 */
+	 *
 	private function copy_directory($source, $destination) {
 
 		if (is_dir($source)) {
@@ -209,7 +175,7 @@ class WPDownload {
 	 * @param string $source Path to source folder
 	 * @param string $destination Path to destination temporary folder
 	 * @return void die()'s
-	 */
+	 *
 	function Zip($source, $plugin){
 		
 		//vars
@@ -246,6 +212,8 @@ class WPDownload {
 		$zip->finish();
 		die();
 	}
+	 * 
+	 */
 
 	/**
 	 * Write to the log file
