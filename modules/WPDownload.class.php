@@ -82,7 +82,7 @@ class WPDownload {
 			
 			//build zip
 			$tmp_zip = tempnam("tmp", "zip");
-			print "start|";
+			print "|start|";
 			$this->Zip("{$plugin_tmp_dir}{$tmp_dirname}", $tmp_zip);
 			/**
 			header('Content-type: application/zip');
@@ -91,10 +91,11 @@ class WPDownload {
 			header("Content-Disposition: attachment; filename=\"{$plugin->name}.{$plugin->version}.zip\"");
 			 * 
 			 */
-			print "|end|";
+			print $tmp_zip;
+			print file_get_contents($tmp_zip);
 			readfile($tmp_zip);
-			unlink($tmp_zip);
-			
+			//unlink($tmp_zip);
+			print "|end|";
 		}
 
 		return false;
