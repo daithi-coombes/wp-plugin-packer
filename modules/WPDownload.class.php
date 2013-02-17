@@ -102,7 +102,7 @@ class WPDownload {
 	private function copy_directory($source, $destination) {
 
 		if (is_dir($source)) {
-			mkdir($destination);
+			@mkdir($destination);
 			$directory = dir($source);
 			while (FALSE !== ( $readdirectory = $directory->read() )) {
 				if ($readdirectory == '.' || $readdirectory == '..') {
