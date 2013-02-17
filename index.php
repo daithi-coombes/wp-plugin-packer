@@ -13,7 +13,7 @@
 //debug?
 error_reporting(E_ALL);
 ini_set('display_errors', 'on');
-set_error_handler("wppp_error_handler");
+//set_error_handler("wppp_error_handler");
 
 //includes
 require_once('debug.func.php');
