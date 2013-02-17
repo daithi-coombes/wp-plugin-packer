@@ -17,6 +17,7 @@ ini_set('display_errors', 'on');
 
 //includes
 require_once('debug.func.php');
+require_once('includes/zipstream-php-0.2.2/zipstream.php');
 
 /**
  * Globals
