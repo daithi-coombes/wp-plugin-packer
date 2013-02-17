@@ -160,8 +160,8 @@ class WPDownload {
 		 */
 
 		$zip = new ZipStream("test.zip");
-		$zip->add_file("index.php", "this is the data for the first file");
-		$zip->finish();
+		@$zip->add_file("index.php", "this is the data for the first file");
+		@$zip->finish();
 		die();
 		die();
 		$source = str_replace('\\', '/', realpath($source));
