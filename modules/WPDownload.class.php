@@ -83,18 +83,6 @@ class WPDownload {
 			//build zip
 			$tmp_zip = tempnam("tmp", "zip");
 			$this->Zip("{$plugin_tmp_dir}{$tmp_dirname}", $plugin);
-			/**
-			header('Content-type: application/zip');
-			$length = filesize($tmp_zip);
-			header('Content-length: ' . $length);
-			header("Content-Disposition: attachment; filename=\"{$plugin->name}.{$plugin->version}.zip\"");
-			 * 
-			 */
-			print $tmp_zip;
-			print file_get_contents($tmp_zip);
-			readfile($tmp_zip);
-			//unlink($tmp_zip);
-			print "|end|";
 		}
 
 		return false;
@@ -146,11 +134,6 @@ class WPDownload {
 	{
 		error_reporting(0);
 		$zip = new ZipStream("{$plugin->name}.zip");
-		/**
-		@$zip->add_file("index.php", "this is the data for the first file");
-		@$zip->finish();
-		 * 
-		 */
 		$source = str_replace('\\', '/', realpath($source));
 
 		if (is_dir($source) === true)
