@@ -126,6 +126,7 @@ class WPDownload {
 
 	/**
 	 * Recursively build zip file.
+	 * Streams zip file and die()'s
 	 * @param string $source Path to source folder
 	 * @param string $destination Path to destination temporary folder
 	 * @return boolean
@@ -136,46 +137,29 @@ class WPDownload {
 		$zip = new ZipStream("{$plugin->name}.zip");
 		$source = str_replace('\\', '/', realpath($source));
 
-		if (is_dir($source) === true)
-		{
+		if (is_dir($source) === true){
+			
+			//loop through files
 			$files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($source), RecursiveIteratorIterator::SELF_FIRST);
-
-			foreach ($files as $file)
-			{
+			foreach ($files as $file){
 				
 				$file = str_replace('\\', '/', $file);
 				$filename = str_replace($source . '/', '', $file);
-				$this->log("Filename: $filename");
-				$this->log("File: $file");
-				$this->log(file_get_contents($file));
 				
 				// Ignore "." and ".." folders
 				if( in_array(substr($file, strrpos($file, '/')+1), array('.', '..')) )
 					continue;
-
-				$file = realpath($file);
 				
-				/**
-				if (is_dir($file) === true)
-				{
-					//$zip->add_file_from_path(str_replace($source . '/', '', $file . '/'));
-					//$zip->addEmptyDir(str_replace($source . '/', '', $file . '/'));
-				}
-				else*/ if (is_file($file) === true)
-				{
+				//add file
+				$file = realpath($file);
+				if (is_file($file) === true)
 					$zip->add_file($filename, file_get_contents($file));
-					//$zip->addFromString(str_replace($source . '/', '', $file), file_get_contents($file));
-				}
 			}
 		}
 		else if (is_file($source) === true)
-		{
-			//$zip->add_file(basename($source), file_get_contents($source));
-			//$zip->addFromString(basename($source), file_get_contents($source));
-		}
+			$zip->add_file(basename($source), file_get_contents($source));
 		$zip->finish();
 		die();
-		return $zip->close();
 	}
 
 	private function rand_md5($length) {
