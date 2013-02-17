@@ -37,7 +37,7 @@ class WPDownload {
 		$this->log("DTO:");
 		$this->log($dto);
 		//end bootstrap
-
+		
 		$zip = $this->pack_plugin($plugin);
 		die();
 	}
@@ -82,11 +82,16 @@ class WPDownload {
 			
 			//build zip
 			$tmp_zip = tempnam("tmp", "zip");
+			print "start|";
 			$this->Zip("{$plugin_tmp_dir}{$tmp_dirname}", $tmp_zip);
-			header('Content-Type: application/zip');
+			/**
+			header('Content-type: application/zip');
 			$length = filesize($tmp_zip);
-			header('Content-Length: ' . $length);
+			header('Content-length: ' . $length);
 			header("Content-Disposition: attachment; filename=\"{$plugin->name}.{$plugin->version}.zip\"");
+			 * 
+			 */
+			print "|end|";
 			readfile($tmp_zip);
 			unlink($tmp_zip);
 			
