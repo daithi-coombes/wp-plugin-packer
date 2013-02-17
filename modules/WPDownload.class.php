@@ -84,7 +84,8 @@ class WPDownload {
 			$tmp_zip = tempnam("tmp", "zip");
 			$this->Zip("{$plugin_tmp_dir}{$tmp_dirname}", $tmp_zip);
 			header('Content-Type: application/zip');
-			//header('Content-Length: ' . filesize($tmp_zip));
+			$length = filesize($tmp_zip);
+			header('Content-Length: ' . $lenth);
 			header("Content-Disposition: attachment; filename=\"{$plugin->name}.{$plugin->version}.zip\"");
 			readfile($tmp_zip);
 			unlink($tmp_zip);
