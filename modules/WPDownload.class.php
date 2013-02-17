@@ -450,6 +450,8 @@ class WPDownload_Zipfile extends ZipStream{
 	 * @return void die()'s
 	 */
 	function stream( $source='tmp_dir' ){
+		
+		error_reporting(0);
 		$source = str_replace('\\', '/', realpath($this->plugin->$source));
 
 		//if root is directory
