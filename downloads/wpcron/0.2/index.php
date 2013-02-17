@@ -33,7 +33,8 @@ ini_set('display_errors', 'on');
 
 //globals
 $wp_cron_ccc_server = "http://wp-cron.loc/ccc/setAlarm.php";
-define('WPCRON_CUSTOMER_KEY', "0akjdfha659374jsdfl732ol87fkLJH87LLSfjhLH");
+$version = "0.2";
+define('WPCRON_CUSTOMER_KEY', "e3f8e543e968d7d0390a71bf3c4c2144");
 
 //constants
 define('WPCRON_DIR', dirname(__FILE__));
@@ -62,7 +63,7 @@ add_action('init', 'wpcron_activate_au');
 function wpcron_activate_au()
 {
 	require_once(WPCRON_DIR . '/application/includes/wp_autoupdate.php');
-	$version = '1.0';
+	global $version;
 	$update_server = 'http://wp-cron.loc/wp-admin/admin-ajax.php?' . http_build_query(array(
 		'action' => 'wpdownload_update'
 	));

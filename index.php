@@ -59,13 +59,12 @@ $wppp_logger->info("Wordpresss Plugin Packager started");
 
 //plugin classes
 $download = new WPDownload();
-$updater = new WPDownload_Update();
 //end constructors
 
 /**
  * Actions, hooks and filters 
  */
-add_action('plugins_loaded', array(&$updater, 'stdin'));	//look for plugin update requests (admin-ajax won't work because request var action used by updater)
+//add_action('plugins_loaded', array(&$updater, 'stdin'));	//@deprecated updater now needs to be in doc root
 add_action('wp_ajax_nopriv_wp-plugin-packer_download', array(&$download, 'stdin'));
 add_action('wp_ajax_wp-plugin-packer_download', array(&$download, 'stdin'));
 register_activation_hook(__FILE__, "wp_plugin_packer_activate");
