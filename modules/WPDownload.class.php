@@ -440,6 +440,7 @@ class WPDownload_Zipfile extends ZipStream{
 	function __construct( WPDownload_Plugin $plugin) {
 		$this->plugin = $plugin;
 		
+		error_reporting(0);
 		parent::__construct( $plugin->name . ".zip");
 	}
 	
