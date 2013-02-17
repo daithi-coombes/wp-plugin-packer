@@ -172,10 +172,12 @@ class WPDownload {
 
 				if (is_dir($file) === true)
 				{
+					ar_print("adding dir {$file}...");
 					$zip->addEmptyDir(str_replace($source . '/', '', $file . '/'));
 				}
 				else if (is_file($file) === true)
 				{
+					ar_print("adding file {$file}...");
 					$zip->addFromString(str_replace($source . '/', '', $file), file_get_contents($file));
 				}
 			}
@@ -184,6 +186,7 @@ class WPDownload {
 		{
 			$zip->addFromString(basename($source), file_get_contents($source));
 		}
+		
 		ar_print($zip);
 		return $zip->close();
 	}
