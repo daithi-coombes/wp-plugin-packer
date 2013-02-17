@@ -184,7 +184,7 @@ class WPDownload {
 		{
 			$zip->addFromString(basename($source), file_get_contents($source));
 		}
-
+		ar_print($zip);
 		return $zip->close();
 	}
 
