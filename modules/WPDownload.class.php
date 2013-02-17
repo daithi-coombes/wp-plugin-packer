@@ -137,20 +137,16 @@ class WPDownload {
 	}
 
 	/**
-	 * Recursively build zip file.
+	 * Build and stream zipfile.
+	 * Will stream zipfile and die()
 	 * @param string $source Path to source folder
-	 * @param string $destination Path to destination temporary folder
+	 * @param WPDownload_Plugin $plugin The plugin object
 	 * @return boolean
 	 */
-	function Zip($source, $plugin)
+	function Zip($source, WPDownload_Plugin $plugin)
 	{
 		error_reporting(0);
-		$zip = new ZipStream("{$plugin->name}.zip");
-		/**
-		@$zip->add_file("index.php", "this is the data for the first file");
-		@$zip->finish();
-		 * 
-		 */
+		$zip = new ZipStream($plugin->zipname);
 		$source = str_replace('\\', '/', realpath($source));
 
 		if (is_dir($source) === true)
@@ -162,9 +158,6 @@ class WPDownload {
 				
 				$file = str_replace('\\', '/', $file);
 				$filename = str_replace($source . '/', '', $file);
-				$this->log("Filename: $filename");
-				$this->log("File: $file");
-				$this->log(file_get_contents($file));
 				
 				// Ignore "." and ".." folders
 				if( in_array(substr($file, strrpos($file, '/')+1), array('.', '..')) )
@@ -172,23 +165,9 @@ class WPDownload {
 
 				$file = realpath($file);
 				
-				/**
-				if (is_dir($file) === true)
-				{
-					//$zip->add_file_from_path(str_replace($source . '/', '', $file . '/'));
-					//$zip->addEmptyDir(str_replace($source . '/', '', $file . '/'));
-				}
-				else*/ if (is_file($file) === true)
-				{
+				if (is_file($file) === true)
 					$zip->add_file($filename, file_get_contents($file));
-					//$zip->addFromString(str_replace($source . '/', '', $file), file_get_contents($file));
-				}
 			}
-		}
-		else if (is_file($source) === true)
-		{
-			//$zip->add_file(basename($source), file_get_contents($source));
-			//$zip->addFromString(basename($source), file_get_contents($source));
 		}
 		$zip->finish();
 		die();
@@ -254,14 +233,18 @@ class WPDownload_Plugin {
 
 	public $name;
 	public $version;
+	public $zipname;
 
 	function __construct(WPDownload_DTO $dto) {
 
-		$this->name = $dto->requests['plugin'];
-		if ($dto->requests['version'])
+		$this->zipname, $this->name = $dto->requests['plugin'];
+		if ($dto->requests['version']){
 			$this->version = $dto->requests['version'];
+			$this->zipname . "." . $this->version;
+		}
 		else
 			$this->version = false;
+		$this->zipname .= ".zip";
 	}
 
 }
