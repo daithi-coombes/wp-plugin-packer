@@ -9,12 +9,14 @@ class WPDownload {
 
 	private $logger;
 	private $plugin_source;
+	private $plugin_tmp_dir;
 
 	function __construct() {
 		
 		global $wppp_logger;
 		$this->logger = $wppp_logger;
 		$this->plugin_source = dirname(dirname(__FILE__)) . "/downloads";
+		$this->plugin_tmp_dir = WP_CONTENT_DIR . "/uploads/wp-download";
 	}
 
 	/**
@@ -27,15 +29,30 @@ class WPDownload {
 		 * Bootstrap
 		 */
 		$dto = new WPDownload_DTO();
-		$plugin = new WPDownload_Plugin($dto);
-
-		//check key
-		if (
-				!@$_REQUEST['key'] ||
-				!$dto->check_key()
-		) $this->error("Invalid key", $_REQUEST);
+		$plugin = new WPDownload_Plugin(array(
+			'plugin_root' => $this->plugin_source,
+			'name' => $dto->plugin,
+			'tmp_dir' => $this->plugin_tmp_dir,
+			'version' => $dto->version
+		));
 		//end bootstrap
 		
+		/**
+		 * preferred code flow:
+		 * 
+		 * 
+		 * if('downloading new zip'):
+		 *	- confirm paypal
+		 *	- $plugin = new WPDownload_Plugin()
+		 *  - $plugin->create_tmp()
+		 *  - $plugin->set_key()	//in later versions this will check db for key settings and params
+		 *  - $zip = new WPDownload_Zipfile( $plugin->tmp_plugin() );	//tmp_plugin() will return new WPDownload_Plugin with the tmp_dir contents as source
+		 *  - $zip->stream()
+		 *  - die()
+		 * 
+		 * if('updating plugin):
+		 *  - plugin->check_key()
+		 */
 		
 		/**
 		 * Action
@@ -45,6 +62,23 @@ class WPDownload {
 			//download a plugin
 			case 'download-plugin':
 				
+				/**
+				 * Confirm paypal
+				 */
+				;
+				//end Confirm paypal
+				
+				//create temporary plugin
+				$plugin->create_tmp();
+				
+				//set new key
+				$plugin->set_key();
+				
+				$zip = new WPDownload_Zipfile( $plugin );
+				
+				$zip->stream();
+				die();
+				/**
 				//vars
 				$action = @$_REQUEST['wp-download-action'];
 				if ($plugin->version)
@@ -75,6 +109,8 @@ class WPDownload {
 				//build zip
 				$tmp_zip = tempnam("tmp", "zip");
 				$this->Zip("{$plugin_tmp_dir}{$tmp_dirname}", $plugin);
+				 * 
+				 */
 				break;
 				
 			//no action, throw error.
@@ -132,6 +168,7 @@ class WPDownload {
 
 	/**
 	 * Copies plugin from source to destination
+	 * @deprecated moved to WPDownload_Plugin
 	 * @param string $source The path to the source files
 	 * @param string $destination The path to the destination files
 	 */
@@ -211,22 +248,6 @@ class WPDownload {
 	}
 
 	/**
-	 * Generate a random string
-	 * @param integer $length The required string length
-	 * @return string Returns the random string
-	 */
-	private function rand_md5($length) {
-		$max = ceil($length / 32);
-		$random = '';
-		for ($i = 0; $i < $max; $i++) {
-			$random .= md5(microtime(true) . mt_rand(10000, 90000));
-		}
-		$key = substr($random, 0, $length);
-		$this->log("Random key: {$key}");
-		return $key;
-	}
-
-	/**
 	 * Write to the log file
 	 * @global Logger $wpp_logger The log4php Logger class
 	 * @param string $msg The message to log
@@ -273,18 +294,191 @@ class WPDownload_DTO {
 
 }
 
+/**
+ * WP Download Plugin object
+ */
 class WPDownload_Plugin {
 
+	public $key_replace;
 	public $name;
+	public $path;
+	public $plugin_root;
+	public $tmp_dir;
 	public $version;
 
-	function __construct(WPDownload_DTO $dto) {
-
-		$this->name = $dto->requests['plugin'];
-		if ($dto->requests['version'])
-			$this->version = $dto->requests['version'];
+	function __construct(array $params) {
+		
+		//Set Fields
+		foreach($params as $key=>$val)
+			$this->$key = $val;
+		//end Set Fields
+		
+		//Plugin Path
+		if ($this->version)
+			$this->path = $this->plugin_root . "/" . $this->name . "/" . $this->version;
 		else
-			$this->version = false;
+			$this->path = $this->plugin_root . "/" . $this->name;
+		//end Plugin Path
+		
+		//These params will be taken from db in final release. These are all
+		//set by wp-admin in the wp-download-plugin dashboard page
+		$this->key_file = "index.php";	//nb in finished version this will be taken from db
+		$this->key_replace = 'e3f8e543e968d7d0390a71bf3c4c2144';
+		//end db params
 	}
 
+	/**
+	 * Makes copy of plugin in tmp directory.
+	 * Will create a unique folder in $this->tmp_dir and append name of new
+	 * directory to $this->tmp_dir accordingly.
+	 * @return void
+	 */
+	public function create_tmp(){
+		
+		//vars
+		$tmp_dirname = time();
+
+		//create tmp dir's
+		if (!file_exists($this->tmp_dir))
+			mkdir($this->tmp_dir);
+		while (file_exists("{$this->tmp_dir}/{$tmp_dirname}"))
+			$tmp_dirname++;
+		mkdir("$this->tmp_dir/{$tmp_dirname}");
+		$this->tmp_dir .= "/{$tmp_dirname}";
+
+		//copy plugin files to tmp dir
+		$this->copy_directory($this->path, $this->tmp_dir);
+	}
+	
+	/**
+	 * Sets the plugin key
+	 * @param mixed $key Default false. If not set then 32 char key is 
+	 * generated
+	 * @param tmp_dir|path $source Default tmp_dir. Whether to update key
+	 * in plugin path or plugin in tmp_dir.
+	 */
+	public function set_key( $key=false, $source='tmp_dir' ){
+		
+		//get key
+		if(!$key)
+			$key = $this->rand_md5(32);
+		
+		//get key file
+		$key_file = $this->$source . "/" . $this->key_file;
+		
+		//add key to file
+		$file = file_get_contents( $key_file );
+		$file = preg_replace("/$this->key_replace/", $key, $file);
+		file_put_contents($key_file, $file);
+	}
+	
+	/**
+	 * Copies plugin from source to destination
+	 * @param string $source The path to the source files
+	 * @param string $destination The path to the destination files
+	 */
+	private function copy_directory($source, $destination) {
+
+		if (is_dir($source)) {
+			@mkdir($destination);
+			$directory = dir($source);
+			while (FALSE !== ( $readdirectory = $directory->read() )) {
+				if ($readdirectory == '.' || $readdirectory == '..') {
+					continue;
+				}
+				$PathDir = $source . '/' . $readdirectory;
+				if (is_dir($PathDir)) {
+					$this->copy_directory($PathDir, $destination . '/' . $readdirectory);
+					continue;
+				}
+				copy($PathDir, $destination . '/' . $readdirectory);
+			}
+
+			$directory->close();
+		} else {
+
+			//if file with key then create file
+			if ($source == "{$plugin_folder}/{$plugin_file}") {
+				$fp = fopen($destination, "w");
+				fwrite($fp, $file);
+				fclose($fp);
+			}
+			else
+				copy($source, $destination);
+		}
+	}
+
+	/**
+	 * Generate a random string
+	 * @param integer $length The required string length
+	 * @return string Returns the random string
+	 */
+	private function rand_md5($length) {
+		$max = ceil($length / 32);
+		$random = '';
+		for ($i = 0; $i < $max; $i++) {
+			$random .= md5(microtime(true) . mt_rand(10000, 90000));
+		}
+		$key = substr($random, 0, $length);
+		return $key;
+	}
+
+}
+
+/**
+ * Zip class for packing plugins
+ */
+class WPDownload_Zipfile extends ZipStream{
+	
+	/** WPDownload_Plugin The plugin object to build zip file from */
+	private $plugin;
+	
+	/**
+	 * Set params and construct parent
+	 * @param WPDownload_Plugin $plugin The plugin to build zip file from
+	 */
+	function __construct( WPDownload_Plugin $plugin) {
+		$this->plugin = $plugin;
+		
+		parent::__construct( $plugin->name . ".zip");
+	}
+	
+	/**
+	 * Streams a zip file to stdout
+	 * Builds the zipfile, prints headers, stream to stdout and die()
+	 * @param tmp_dir|path $source Where to stream the zip file from
+	 * @return void die()'s
+	 */
+	function stream( $source='tmp_dir' ){
+		$source = str_replace('\\', '/', realpath($this->plugin->$source));
+
+		//if root is directory
+		if (is_dir($source) === true){
+			
+			//loop through files
+			$files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($source), RecursiveIteratorIterator::SELF_FIRST);
+			foreach ($files as $file){
+				
+				$file = str_replace('\\', '/', $file);
+				$filename = str_replace($source . '/', '', $file);
+				
+				// Ignore "." and ".." folders
+				if( in_array(substr($file, strrpos($file, '/')+1), array('.', '..')) )
+					continue;
+				
+				//add file
+				$file = realpath($file);
+				if (is_file($file) === true)
+					$this->add_file($filename, file_get_contents($file));
+			}
+		}
+		
+		//if single file
+		else if (is_file($source) === true)
+			$this->add_file(basename($source), file_get_contents($source));
+		
+		//finish stream and die()
+		$this->finish();
+		die();
+	}
 }
