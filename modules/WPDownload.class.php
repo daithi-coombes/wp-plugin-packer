@@ -145,9 +145,11 @@ class WPDownload {
 	 */
 	function Zip($source, $destination)
 	{
+		ar_print("Starting zip file");
 		if (!extension_loaded('zip') || !file_exists($source)) {
 			return false;
 		}
+		ar_print("extension loaded");
 
 		$zip = new ZipArchive();
 		if (!$zip->open($destination, ZIPARCHIVE::CREATE)) {
