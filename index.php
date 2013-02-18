@@ -80,6 +80,8 @@ function wp_plugin_packer_activate(){
 	require_once( ABSPATH . '/wp-admin/includes/upgrade.php');
 	
 	global $wpdb;
+	
+	//clients
 	$table = $wpdb->prefix . "wppp_client";
 	$sql = "
 		CREATE TABLE IF NOT EXISTS `{$table}` (
@@ -88,6 +90,18 @@ function wp_plugin_packer_activate(){
 		`key` varchar(250) NOT NULL,
 		PRIMARY KEY (`id`)
 		) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+		";
+	dbDelta($sql);
+	
+	//paypal ipns
+	$table = $wpdb->prefix . "wppp_ipn";
+	$sql = "
+		CREATE TABLE IF NOT EXISTS `wp_wppp_ipn` (
+		  `tx` varchar(40) NOT NULL,
+		  `action` varchar(40) NOT NULL,
+		  `request` blob NOT NULL,
+		  PRIMARY KEY (`tx`)
+		)
 		";
 	dbDelta($sql);
 }

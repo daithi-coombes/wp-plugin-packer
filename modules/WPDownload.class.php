@@ -24,9 +24,12 @@ class WPDownload extends WPDownload_Interface{
 
 	/**
 	 * Method checks requests and bootstraps.
+	 * @global wpdb $wpdb The wordpress core modal
 	 * @return void die()'s when finished.
 	 */
 	public function stdin() {
+		
+		global $wpdb;
 
 		/**
 		 * Bootstrap
@@ -40,6 +43,12 @@ class WPDownload extends WPDownload_Interface{
 				));
 		//end bootstrap
 
+		$wpdb->insert($wpdb->prefix ."wppp_ipn", array(
+			'txt' => $dto->requests['tx'],
+			'request' => serialize($dto->requests),
+			'action' => $dto->requests['wp-download-action']
+		), array('%s','%s','%s'));
+		$this->log($wpdb);
 		/**
 		 * preferred code flow:
 		 * 
@@ -80,10 +89,10 @@ class WPDownload extends WPDownload_Interface{
 
 				$ipn = new WPDownload_IPN($dto);
 				
-				if(!$ipn->validate())
-					$this->error("Invalid IPN", $ipn);
 				
 				$this->log($ipn);
+				if(!$ipn->validate())
+					$this->error("Invalid IPN", $ipn);
 				break;
 
 			case 'paypal-success':
