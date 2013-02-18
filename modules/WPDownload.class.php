@@ -82,6 +82,14 @@ class WPDownload extends WPDownload_Interface{
 				$this->log($ipn);
 				break;
 
+			case 'paypal_success':
+				
+				print "<h1>Please wait whilst we verify your payment...</h1>";
+				$this->log($dto);
+				ar_print($dto);
+				
+				break;
+			
 			//no action, throw error.
 			default:
 				$this->error("Invalid action", $_REQUEST);
