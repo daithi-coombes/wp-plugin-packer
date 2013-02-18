@@ -79,6 +79,10 @@ class WPDownload extends WPDownload_Interface{
 			case 'paypal-ipn':
 
 				$ipn = new WPDownload_IPN($dto);
+				
+				if(!$ipn->validate())
+					$this->error("Invalid IPN", $ipn);
+				
 				$this->log($ipn);
 				break;
 
@@ -164,6 +168,9 @@ class WPDownload_DTO extends WPDownload_Interface{
 class WPDownload_IPN extends WPDownload_Interface{
 
 	public $response;
+	private $txn_id;
+	private $payer_status;
+	private $payment_status;
 	
 	function __construct(WPDownload_DTO $dto) {
 
@@ -198,6 +205,18 @@ class WPDownload_IPN extends WPDownload_Interface{
 			return false;
 	}
 
+	public function validate(){
+		
+		//conditions for fail
+		if(
+			$this->txn_id &&
+			($this->payer_status=='verified') &&
+			(strtolower($this->payment_status)=='completed')
+		) return true;
+		
+		//default fail
+		return false;
+	}
 }
 
 /**
