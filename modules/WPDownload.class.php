@@ -1,9 +1,10 @@
 <?php
 
 /**
- * Description of WPDownload
+ * The main WP Plugin Packer class.
  *
  * @author daithi
+ * @package WPDownload
  */
 class WPDownload extends WPDownload_Interface{
 
@@ -112,6 +113,7 @@ class WPDownload extends WPDownload_Interface{
 
 /**
  * WP Download Data Transport Object
+ * @package WPDownload
  */
 class WPDownload_DTO extends WPDownload_Interface{
 
@@ -146,6 +148,10 @@ class WPDownload_DTO extends WPDownload_Interface{
 
 }
 
+/**
+ * The WP Plugin Packer IPN class
+ * @package WPDownload
+ */
 class WPDownload_IPN extends WPDownload_Interface{
 
 	public $response;
@@ -186,7 +192,8 @@ class WPDownload_IPN extends WPDownload_Interface{
 }
 
 /**
- * WP Download Plugin object
+ * WP Plugin Packer plugin class
+ * @package WPDownload
  */
 class WPDownload_Plugin extends WPDownload_Interface{
 
@@ -316,6 +323,7 @@ class WPDownload_Plugin extends WPDownload_Interface{
 
 /**
  * Zip class for packing plugins
+ * @package WPDownload
  */
 class WPDownload_Zipfile extends ZipStream {
 
@@ -376,6 +384,10 @@ class WPDownload_Zipfile extends ZipStream {
 
 }
 
+/**
+ * Main interface for the WP Pluign Packer classes
+ * @package WPDownload
+ */
 class WPDownload_Interface{
 	
 	protected $logger;
