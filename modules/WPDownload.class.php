@@ -82,7 +82,7 @@ class WPDownload extends WPDownload_Interface{
 				$this->log($ipn);
 				break;
 
-			case 'paypal_success':
+			case 'paypal-success':
 				
 				print "<h1>Please wait whilst we verify your payment...</h1>";
 				$this->log($dto);
@@ -127,6 +127,7 @@ class WPDownload_DTO extends WPDownload_Interface{
 
 	public $plugin = "";
 	public $requests = array();
+	public $version = null;
 
 	function __construct() {
 
@@ -191,7 +192,7 @@ class WPDownload_IPN extends WPDownload_Interface{
 	static public function is_ipn( array $post ){
 		
 		//check for ipn_id
-		if($post['txn_id'])
+		if(@$post['txn_id'])
 			return true;
 		else
 			return false;
