@@ -41,6 +41,10 @@ class WPDownload extends WPDownload_Interface{
 					'tmp_dir' => $this->plugin_tmp_dir,
 					'version' => $dto->version
 				));
+		//paypal ipn
+		($dto->tx) ?
+			$ipn = new WPDownload_IPN($dto):
+			$ipn = false;
 		//end bootstrap
 
 		$wpdb->insert($wpdb->prefix ."wppp_ipn", array(
@@ -102,7 +106,19 @@ class WPDownload extends WPDownload_Interface{
 			case 'paypal-success':
 				
 				print "<h1>Please wait whilst we verify your payment...</h1>";
+				$params = array(
+					'cmd' => '_notify-synch',
+					'tx' => $dto->tx,
+					'at' => $dto->requests['at']
+				);
+				$res = wp_remote_post($url, array(
+					'body' => $params
+				));
+				
+				$this->log($res);
 				$this->log($dto);
+				ar_print($params);
+				ar_print($res);
 				ar_print($dto);
 				
 				break;
