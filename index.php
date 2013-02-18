@@ -89,20 +89,17 @@ function wp_plugin_packer_activate(){
 		`blog` varchar(250) NOT NULL,
 		`key` varchar(250) NOT NULL,
 		PRIMARY KEY (`id`)
-		) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
-		";
-	dbDelta($sql);
+		) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;";
 	
 	//paypal ipns
 	$table = $wpdb->prefix . "wppp_ipn";
-	$sql = "
-		CREATE TABLE IF NOT EXISTS `wp_wppp_ipn` (
+	$sql .= "
+		CREATE TABLE IF NOT EXISTS `{$table}` (
 		  `tx` varchar(40) NOT NULL,
 		  `action` varchar(40) NOT NULL,
 		  `request` blob NOT NULL,
 		  PRIMARY KEY (`tx`)
-		)
-		";
+		);";
 	dbDelta($sql);
 }
 function wppp_error_handler($errno, $errstr, $errfile, $errline){	
