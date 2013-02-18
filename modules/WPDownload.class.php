@@ -109,9 +109,9 @@ class WPDownload extends WPDownload_Interface{
 				$params = array(
 					'cmd' => '_notify-synch',
 					'tx' => $dto->tx,
-					'at' => $dto->requests['at']
+					'at' => "QvYOro8F8p5qFQFkGWGjnJpXOMOAFREkQDRR30doRpHhC1ltmXupJ6NtrQS"
 				);
-				$res = wp_remote_post($url, array(
+				$res = wp_remote_post("https://www.sandbox.paypal.com/cgi-bin/webscr", array(
 					'body' => $params
 				));
 				
