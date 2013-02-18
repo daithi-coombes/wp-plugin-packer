@@ -97,7 +97,7 @@ function wp_plugin_packer_activate(){
 		CREATE TABLE IF NOT EXISTS `{$table}` (
 		  `tx` varchar(40) NOT NULL,
 		  `action` varchar(40) NOT NULL,
-		  `request` blob NOT NULL,
+		  `request` text NOT NULL,
 		  PRIMARY KEY (`tx`)
 		);";
 	dbDelta($sql);
