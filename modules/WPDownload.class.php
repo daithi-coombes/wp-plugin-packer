@@ -44,9 +44,9 @@ class WPDownload extends WPDownload_Interface{
 		//end bootstrap
 
 		$wpdb->insert($wpdb->prefix ."wppp_ipn", array(
-			'txt' => $dto->requests['tx'],
-			'request' => serialize($dto->requests),
-			'action' => $dto->requests['wp-download-action']
+			'tx' => @$dto->requests['tx'],
+			'request' => @serialize($dto->requests),
+			'action' => @$dto->requests['wp-download-action']
 		), array('%s','%s','%s'));
 		$this->log($wpdb);
 		/**
