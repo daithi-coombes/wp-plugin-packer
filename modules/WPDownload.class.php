@@ -8,11 +8,13 @@
 	 */
 	class WPDownload extends WPDownload_Interface {
 
-		public $logger;
+		//dp params - get/set for params needed in full version
 		static public $_db = array(
 			'paypal' => array(
 				'pdt_token' => 'QvYOro8F8p5qFQFkGWGjnJpXOMOAFREkQDRR30doRpHhC1ltmXupJ6NtrQS'
-			)
+			),
+			'key_file' => "index.php",
+			'key_replace' => 'e3f8e543e968d7d0390a71bf3c4c2144'
 		);
 		private $plugin_source;
 		private $plugin_tmp_dir;
@@ -43,8 +45,7 @@
 			$plugin = new WPDownload_Plugin(array(
 						'plugin_root' => $this->plugin_source,
 						'name' => $dto->plugin,
-						'tmp_dir' => $this->plugin_tmp_dir,
-						'version' => $dto->version
+						'tmp_dir' => $this->plugin_tmp_dir
 					));
 			//end bootstrap
 			/**
@@ -203,6 +204,8 @@
 			//check if ipn
 			if (WPDownload_IPN::is_ipn($_POST))
 				$this->requests['wp-download-action'] = 'paypal-ipn';
+			
+			parent::__construct();
 		}
 
 		/**
@@ -248,6 +251,8 @@
 					$value = urlencode($value);
 				$this->response .= "&$key=$value";
 			}
+			
+			parent::__construct();
 		}
 
 		/**
@@ -304,12 +309,16 @@
 				$this->path = $this->plugin_root . "/" . $this->name . "/" . $this->version;
 			else
 				$this->path = $this->plugin_root . "/" . $this->name;
+			$this->log("Plugin {$this->name} constructed");
+			
 			//end Plugin Path
 			//These params will be taken from db in final release. These are all
 			//set by wp-admin in the wp-download-plugin dashboard page
-			$this->key_file = "index.php"; //nb in finished version this will be taken from db
-			$this->key_replace = 'e3f8e543e968d7d0390a71bf3c4c2144';
+			$this->key_file = WPDownload::$_db['key_file'];  //"index.php"; //nb in finished version this will be taken from db
+			$this->key_replace = WPDownload::$_db['key_replace']; //'e3f8e543e968d7d0390a71bf3c4c2144';
 			//end db params
+			
+			parent::__construct();
 		}
 
 		/**
@@ -363,7 +372,6 @@
 		 * @param string $destination The path to the destination files
 		 */
 		private function copy_directory($source, $destination) {
-
 			if (is_dir($source)) {
 				@mkdir($destination);
 				$directory = dir($source);
