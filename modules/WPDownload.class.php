@@ -77,7 +77,7 @@
 				case 'download-plugin':
 
 					//check and destroy nonce
-					if(!wp_verify_nonce($dto->requests['_wpnonce'], "wp-download-packer"))
+					if(!$this->verify_nonce(@$dto->requests['_wpnonce'], "wp-download-packer"))
 						die("Invalid nonce, please contact <b>webeire@gmail.com</b>");
 					
 					//create temporary plugin
@@ -133,7 +133,7 @@
 						}
 
 						//link to download
-						$nonce = wp_create_nonce("wp-download-packer");
+						$nonce = $this->create_nonce("wp-download-packer");
 						die("
 							<h2>Please click the below link to download {$plugin->name}</h2>
 							<a href=\"" . admin_url('admin-ajax.php?' .
@@ -480,14 +480,59 @@
 	 */
 	class WPDownload_Interface {
 
+		public $db;
+		private $option_name;
 		protected $logger;
-
+		
+		/**
+		 * Construct the interface
+		 * @global wpdb $wpdb
+		 * @global Logger $wppp_logger
+		 */
 		function __construct() {
 
+			global $wpdb;
 			global $wppp_logger;
+			$this->db = $wpwdb;
 			$this->logger = $wppp_logger;
+			$this->option_name = "wppp-options";
 		}
 
+		/**
+		 * Create a nonce and store in wppp options.
+		 * @param string $action The nonce keyword
+		 * @return string Returns the nonce
+		 */
+		protected function create_nonce($action){
+			$nonce = wp_create_nonce($nonce);
+			$nonces = get_option($this->option_name . "-nonces", array());
+			$nonces[$action][$nonce] = 1;
+			update_option($this->option_name . "-nonces", $nonces);
+			return $nonce;
+		}
+		
+		/**
+		 * Verify a nonce against the wppp options.
+		 * @param string $nonce The nonce
+		 * @param string $action The nonce keyword
+		 * @return boolean
+		 */
+		protected function verify_nonce($nonce, $action){
+			
+			//test nonce
+			$nonces = get_option($this->option_name . "-nonces", array());
+			if(
+				!@$nonces[$action][$nonce] ||
+				!wp_verify_nonce($nonce, $action)
+			)
+				return false;
+			
+			//unset and update wppp nonces
+			unset($nonces[$action][$nonce]);
+			update_option($this->option_name . "-nonces", $nonces);
+			return true;
+		}
+		
 		/**
 		 * Write to the log file
 		 * @global Logger $wpp_logger The log4php Logger class
