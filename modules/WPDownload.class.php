@@ -71,7 +71,7 @@
 					$wpdb->update($wpdb->prefix . "wppp_client", array(
 						'key' => $key
 					), array(
-						'id' => $dto->response['cl']
+						'id' => $dto->requests['cl']
 					), array('%s'), array('%d'));
 					
 					$this->log($wpdb);
