@@ -48,27 +48,7 @@
 						'tmp_dir' => $this->plugin_tmp_dir
 					));
 			//end bootstrap
-			/**
-			 * preferred code flow:
-			 * 
-			 * 
-			 * if('paypal-success'):	//confirm, then download plugin
-			 * 	- confirm paypal pdt	//send post back to paypal
-			 *  - store sale details (inc blog and key)
-			 * 	- $plugin = new WPDownload_Plugin()
-			 *  - $plugin->create_tmp()
-			 *  - $plugin->set_key()	//in later versions this will check db for key settings and params
-			 *  - $zip = new WPDownload_Zipfile( $plugin->tmp_plugin() );	//tmp_plugin() will return new WPDownload_Plugin with the tmp_dir contents as source
-			 *  - $zip->stream()
-			 *  - die()
-			 * 
-			 * if('paypal-ipn'):
-			 *  - confirm ipn
-			 *  - update db tx record
-			 * 
-			 * if('updating plugin'):
-			 *  - plugin->check_key()
-			 */
+			
 			/**
 			 * Action
 			 */
@@ -85,8 +65,17 @@
 					$plugin->create_tmp();
 
 					//set new key
-					$plugin->set_key();
+					$key = $plugin->set_key();
 
+					//update client record with key
+					$wpdb->update($wpdb->prefix . "wppp_client", array(
+						'key' => $key
+					), array(
+						'id' => $dto->response['cl']
+					), array('%s'), array('%d'));
+					
+					$this->log($wpdb);
+					
 					//build zip and stream
 					$zip = new WPDownload_Zipfile($plugin);
 					$zip->stream();
@@ -133,6 +122,13 @@
 							$response[urldecode($key)] = urldecode($val);
 						}
 
+						//create client record
+						$wpdb->insert($wpdb->prefix . "wppp_client", array(
+							'blog' => $response['custom'],
+							'paypal_id' => $response['payer_id'],
+							'tx_id' => $response['txn_id']
+						), array('%s','%s','%s'));
+						
 						//link to download
 						$nonce = $this->create_nonce("wp-download-packer");
 						die("
@@ -142,7 +138,8 @@
 										'action' => 'wp-plugin-packer_download',
 										'wp-download-action' => 'download-plugin',
 										'plugin' => $plugin->name,
-										'_wpnonce' => $nonce
+										'_wpnonce' => $nonce,
+										'cl' => $wpdb->insert_id
 									))) . "\">Download</a>" );
 
 					}
@@ -157,8 +154,6 @@
 					$this->error("Invalid action", $_REQUEST);
 					break;
 			}
-		//grab zip
-		//$zip = $this->pack_plugin($plugin);
 		die();
 	}
 
@@ -350,6 +345,7 @@
 		 * generated
 		 * @param tmp_dir|path $source Default tmp_dir. Whether to update key
 		 * in plugin path or plugin in tmp_dir.
+		 * @return string Returns the key
 		 */
 		public function set_key($key = false, $source = 'tmp_dir') {
 
@@ -364,6 +360,7 @@
 			$file = file_get_contents($key_file);
 			$file = preg_replace("/$this->key_replace/", $key, $file);
 			file_put_contents($key_file, $file);
+			return $key;
 		}
 
 		/**
