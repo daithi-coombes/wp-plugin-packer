@@ -138,7 +138,6 @@
 							<h2>Please click the below link to download {$plugin->name}</h2>
 							<a href=\"" . admin_url('admin-ajax.php?' .
 									build_query(array(
-										'action=wp-plugin-packer_download&plugin=wpcron',
 										'action' => 'wp-plugin-packer_download',
 										'wp-download-action' => 'download-plugin',
 										'plugin' => $plugin->name,
