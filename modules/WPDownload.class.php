@@ -113,10 +113,12 @@ class WPDownload extends WPDownload_Interface {
 		$lines = explode("\n", $res['body']);
 		$response = array();
 		if(strcmp ($lines[0], "SUCCESS") == 0) {
-			for($i = 1; $i<count($lines); $i++)
+			for($i = 1; $i<count($lines); $i++){
 				list($key, $val) = explode("=", $lines[$i]);
-			$response[urldecode($key)] = urldecode($val);
+				$response[urldecode($key)] = urldecode($val);
+			}
 		}
+		ar_print($lines);
 		ar_print($response);
 		$this->log($res);
 		$this->log($dto);
