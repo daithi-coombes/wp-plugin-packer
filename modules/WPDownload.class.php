@@ -128,7 +128,7 @@
 
 						//build response array
 						for($i = 1; $i<count($lines); $i++){
-							list($key, $val) = explode("=", $lines[$i]);
+							@list($key, $val) = @explode("=", @$lines[$i]);
 							$response[urldecode($key)] = urldecode($val);
 						}
 
@@ -493,7 +493,7 @@
 
 			global $wpdb;
 			global $wppp_logger;
-			$this->db = $wpwdb;
+			$this->db = $wpdb;
 			$this->logger = $wppp_logger;
 			$this->option_name = "wppp-options";
 		}
@@ -504,7 +504,7 @@
 		 * @return string Returns the nonce
 		 */
 		protected function create_nonce($action){
-			$nonce = wp_create_nonce($nonce);
+			$nonce = wp_create_nonce($action);
 			$nonces = get_option($this->option_name . "-nonces", array());
 			$nonces[$action][$nonce] = 1;
 			update_option($this->option_name . "-nonces", $nonces);
