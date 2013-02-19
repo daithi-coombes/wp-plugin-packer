@@ -117,6 +117,7 @@
 						'body' => $params
 					));
 					//end request confirmation
+					$this->log($res);
 
 					//parse response
 					$lines = explode("\n", $res['body']);
