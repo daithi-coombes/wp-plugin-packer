@@ -9,6 +9,11 @@
 class WPDownload extends WPDownload_Interface{
 
 	public $logger;
+	static public $_db = array(
+		'paypal' => array(
+			'pdt_token' => 'QvYOro8F8p5qFQFkGWGjnJpXOMOAFREkQDRR30doRpHhC1ltmXupJ6NtrQS'
+		)
+	);
 	private $plugin_source;
 	private $plugin_tmp_dir;
 
@@ -41,28 +46,14 @@ class WPDownload extends WPDownload_Interface{
 					'tmp_dir' => $this->plugin_tmp_dir,
 					'version' => $dto->version
 				));
-		//paypal ipn
-		($dto->tx) ?
-			$ipn = new WPDownload_IPN($dto):
-			$ipn = false;
 		//end bootstrap
-
-		$wpdb->insert($wpdb->prefix ."wppp_ipn", array(
-			'tx' => (@$dto->requests['tx']) ?
-				$dto->requests['tx']:
-				($dto->requests['txn_id']) ?
-					$dto->requests['txn_id']:
-					'0',
-			'request' => @serialize($dto->requests),
-			'action' => @$dto->requests['wp-download-action']
-		), array('%s','%s','%s'));
-		$this->log($wpdb);
 		/**
 		 * preferred code flow:
 		 * 
 		 * 
-		 * if('downloading new zip'):
-		 * 	- confirm paypal
+		 * if('paypal-success'):	//confirm, then download plugin
+		 * 	- confirm paypal pdt	//send post back to paypal
+		 *  - store sale details (inc blog and key)
 		 * 	- $plugin = new WPDownload_Plugin()
 		 *  - $plugin->create_tmp()
 		 *  - $plugin->set_key()	//in later versions this will check db for key settings and params
@@ -70,7 +61,11 @@ class WPDownload extends WPDownload_Interface{
 		 *  - $zip->stream()
 		 *  - die()
 		 * 
-		 * if('updating plugin):
+		 * if('paypal-ipn'):
+		 *  - confirm ipn
+		 *  - update db tx record
+		 * 
+		 * if('updating plugin'):
 		 *  - plugin->check_key()
 		 */
 		/**
@@ -109,7 +104,7 @@ class WPDownload extends WPDownload_Interface{
 				$params = array(
 					'cmd' => '_notify-synch',
 					'tx' => $dto->tx,
-					'at' => "QvYOro8F8p5qFQFkGWGjnJpXOMOAFREkQDRR30doRpHhC1ltmXupJ6NtrQS"
+					'at' => WPDownload::$_db['paypal']['pdt_token']
 				);
 				$res = wp_remote_post("https://www.sandbox.paypal.com/cgi-bin/webscr", array(
 					'body' => $params
