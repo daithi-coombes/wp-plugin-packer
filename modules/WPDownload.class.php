@@ -1,142 +1,165 @@
 <?php
 
-/**
- * The main WP Plugin Packer class.
- *
- * @author daithi
- * @package WPDownload
- */
-class WPDownload extends WPDownload_Interface {
-
-	public $logger;
-	static public $_db = array(
-		'paypal' => array(
-			'pdt_token' => 'QvYOro8F8p5qFQFkGWGjnJpXOMOAFREkQDRR30doRpHhC1ltmXupJ6NtrQS'
-		)
-	);
-	private $plugin_source;
-	private $plugin_tmp_dir;
-
-	function __construct() {
-
-		global $wppp_logger;
-		$this->logger = $wppp_logger;
-		$this->plugin_source = dirname(dirname(__FILE__)) . "/downloads";
-		$this->plugin_tmp_dir = WP_CONTENT_DIR . "/uploads/wp-download";
-
-		parent::__construct();
-	}
-
 	/**
-	 * Method checks requests and bootstraps.
-	 * @global wpdb $wpdb The wordpress core modal
-	 * @return void die()'s when finished.
+	 * The main WP Plugin Packer class.
+	 *
+	 * @author daithi
+	 * @package WPDownload
 	 */
-	public function stdin() {
+	class WPDownload extends WPDownload_Interface {
 
-		global $wpdb;
-
-		/**
-		 * Bootstrap
-		 */
-		$dto = new WPDownload_DTO(); //will check for ipn action
-		$plugin = new WPDownload_Plugin(array(
-					'plugin_root' => $this->plugin_source,
-					'name' => $dto->plugin,
-					'tmp_dir' => $this->plugin_tmp_dir,
-					'version' => $dto->version
-				));
-		//end bootstrap
-		/**
-		 * preferred code flow:
-		 * 
-		 * 
-		 * if('paypal-success'):	//confirm, then download plugin
-		 * 	- confirm paypal pdt	//send post back to paypal
-		 *  - store sale details (inc blog and key)
-		 * 	- $plugin = new WPDownload_Plugin()
-		 *  - $plugin->create_tmp()
-		 *  - $plugin->set_key()	//in later versions this will check db for key settings and params
-		 *  - $zip = new WPDownload_Zipfile( $plugin->tmp_plugin() );	//tmp_plugin() will return new WPDownload_Plugin with the tmp_dir contents as source
-		 *  - $zip->stream()
-		 *  - die()
-		 * 
-		 * if('paypal-ipn'):
-		 *  - confirm ipn
-		 *  - update db tx record
-		 * 
-		 * if('updating plugin'):
-		 *  - plugin->check_key()
-		 */
-		/**
-		 * Action
-		 */
-		switch ($dto->requests['wp-download-action']) {
-
-		//download a plugin
-		case 'download-plugin':
-
-		//create temporary plugin
-		$plugin->create_tmp();
-
-		//set new key
-		$plugin->set_key();
-
-		//build zip and stream
-		$zip = new WPDownload_Zipfile($plugin);
-		$zip->stream();
-		break;
-
-		//paypal ipn request
-		case 'paypal-ipn':
-
-		$ipn = new WPDownload_IPN($dto);
-
-
-		$this->log($ipn);
-		if(!$ipn->validate())
-		$this->error("Invalid IPN", $ipn);
-		break;
-
-		case 'paypal-success':
-
-		print "<h1>Please wait whilst we verify your payment...</h1>";
-		$params = array(
-		'cmd' => '_notify-synch',
-		'tx' => $dto->tx,
-		'at' => WPDownload::$_db['paypal']['pdt_token']
+		public $logger;
+		static public $_db = array(
+			'paypal' => array(
+				'pdt_token' => 'QvYOro8F8p5qFQFkGWGjnJpXOMOAFREkQDRR30doRpHhC1ltmXupJ6NtrQS'
+			)
 		);
-		$res = wp_remote_post("https://www.sandbox.paypal.com/cgi-bin/webscr", array(
-		'body' => $params
-		));
-		
-		$lines = explode("\n", $res['body']);
-		$response = array();
-		if(strcmp ($lines[0], "SUCCESS") == 0) {
-			for($i = 1; $i<count($lines); $i++){
-				list($key, $val) = explode("=", $lines[$i]);
-				$response[urldecode($key)] = urldecode($val);
+		private $plugin_source;
+		private $plugin_tmp_dir;
+
+		function __construct() {
+
+			global $wppp_logger;
+			$this->logger = $wppp_logger;
+			$this->plugin_source = dirname(dirname(__FILE__)) . "/downloads";
+			$this->plugin_tmp_dir = WP_CONTENT_DIR . "/uploads/wp-download";
+
+			parent::__construct();
+		}
+
+		/**
+		 * Method checks requests and bootstraps.
+		 * @global wpdb $wpdb The wordpress core modal
+		 * @return void die()'s when finished.
+		 */
+		public function stdin() {
+
+			global $wpdb;
+
+			/**
+			 * Bootstrap
+			 */
+			$dto = new WPDownload_DTO(); //will check for ipn action
+			$plugin = new WPDownload_Plugin(array(
+						'plugin_root' => $this->plugin_source,
+						'name' => $dto->plugin,
+						'tmp_dir' => $this->plugin_tmp_dir,
+						'version' => $dto->version
+					));
+			//end bootstrap
+			/**
+			 * preferred code flow:
+			 * 
+			 * 
+			 * if('paypal-success'):	//confirm, then download plugin
+			 * 	- confirm paypal pdt	//send post back to paypal
+			 *  - store sale details (inc blog and key)
+			 * 	- $plugin = new WPDownload_Plugin()
+			 *  - $plugin->create_tmp()
+			 *  - $plugin->set_key()	//in later versions this will check db for key settings and params
+			 *  - $zip = new WPDownload_Zipfile( $plugin->tmp_plugin() );	//tmp_plugin() will return new WPDownload_Plugin with the tmp_dir contents as source
+			 *  - $zip->stream()
+			 *  - die()
+			 * 
+			 * if('paypal-ipn'):
+			 *  - confirm ipn
+			 *  - update db tx record
+			 * 
+			 * if('updating plugin'):
+			 *  - plugin->check_key()
+			 */
+			/**
+			 * Action
+			 */
+			switch ($dto->requests['wp-download-action']) {
+
+				//download a plugin
+				case 'download-plugin':
+
+					//check and destroy nonce
+					if(!wp_verify_nonce($dto->requests['_wpnonce'], "wp-download-packer"))
+						die("Invalid nonce, please contact <b>webeire@gmail.com</b>");
+					
+					//create temporary plugin
+					$plugin->create_tmp();
+
+					//set new key
+					$plugin->set_key();
+
+					//build zip and stream
+					$zip = new WPDownload_Zipfile($plugin);
+					$zip->stream();
+					break;
+
+				//paypal ipn request
+				case 'paypal-ipn':
+
+					$ipn = new WPDownload_IPN($dto);
+
+
+					$this->log($ipn);
+					if(!$ipn->validate())
+					$this->error("Invalid IPN", $ipn);
+					break;
+
+				//paypal success page, make pdt confirmation, download
+				case 'paypal-success':
+
+					print "<h1>Please wait whilst we verify your payment...</h1>";
+
+					//request confirmation
+					$params = array(
+						'cmd' => '_notify-synch',
+						'tx' => $dto->tx,
+						'at' => WPDownload::$_db['paypal']['pdt_token']
+					);
+					$res = wp_remote_post("https://www.sandbox.paypal.com/cgi-bin/webscr", array(
+						'body' => $params
+					));
+					//end request confirmation
+
+					//parse response
+					$lines = explode("\n", $res['body']);
+					$response = array();
+					
+					//succes
+					if(strcmp ($lines[0], "SUCCESS") == 0) {
+
+						//build response array
+						for($i = 1; $i<count($lines); $i++){
+							list($key, $val) = explode("=", $lines[$i]);
+							$response[urldecode($key)] = urldecode($val);
+						}
+
+						//link to download
+						$nonce = wp_create_nonce("wp-download-packer");
+						die("
+							<h2>Please click the below link to download {$plugin->name}</h2>
+							<a href=\"" . admin_url('admin-ajax.php?' .
+									build_query(array(
+										'action=wp-plugin-packer_download&plugin=wpcron',
+										'action' => 'wp-plugin-packer_download',
+										'wp-download-action' => 'download-plugin',
+										'plugin' => $plugin->name,
+										'_wpnonce' => $nonce
+									))) . "\">Download</a>" );
+
+					}
+					
+					//default unsuccessfull payment
+					else
+						die("<h1>There was an error prosessing your payment. Please contact the developer at: <b>webeire@gmail.com</b> asap, thank you");
+					break;
+
+				//no action, throw error.
+				default:
+					$this->error("Invalid action", $_REQUEST);
+					break;
 			}
-		}
-		ar_print($lines);
-		ar_print($response);
-		$this->log($res);
-		$this->log($dto);
-		ar_print($params);
-		ar_print($res);
-		ar_print($dto);
-
-		break;
-
-		//no action, throw error.
-		default:
-		$this->error("Invalid action", $_REQUEST);
-		break;
-		}
 		//grab zip
 		//$zip = $this->pack_plugin($plugin);
 		die();
-		}
+	}
 
 		/**
 		 * Throw an error.
