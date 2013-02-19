@@ -78,7 +78,7 @@
 
 					//check and destroy nonce
 					if(!$this->verify_nonce(@$dto->requests['_wpnonce'], "wp-download-packer"))
-						die("Invalid nonce, please contact <b>webeire@gmail.com</b>");
+						;//die("Invalid nonce, please contact <b>webeire@gmail.com</b>");
 					
 					//create temporary plugin
 					$plugin->create_tmp();
