@@ -291,7 +291,7 @@
 		public $path;
 		public $plugin_root;
 		public $tmp_dir;
-		public $version;
+		public $version = "0.2";
 
 		function __construct(array $params) {
 
