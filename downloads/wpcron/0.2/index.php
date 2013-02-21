@@ -32,7 +32,7 @@ error_reporting(E_ALL);
 ini_set('display_errors', 'on');
 
 //globals
-$wp_cron_ccc_server = "http://wp-cron.loc/ccc/setAlarm.php";
+$wp_cron_ccc_server = "http://david-coombes.com/ccc/setAlarm.php";
 $version = "0.2";
 define('WPCRON_CUSTOMER_KEY', "e3f8e543e968d7d0390a71bf3c4c2144");
 
