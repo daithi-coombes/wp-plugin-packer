@@ -11,7 +11,7 @@
  * @package wpdown_seller
  */
 //debug?
-error_reporting(E_ALL);
+error_reporting(E_ALL ^ E_STRICT);
 ini_set('display_errors', 'on');
 //set_error_handler("wppp_error_handler");
 
