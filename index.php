@@ -53,10 +53,10 @@ function wpdownload_autoload($class){
 if(!class_exists("Logger"))
 	require_once( WPDOWNLOAD_DIR . "/includes/apache-log4php-2.3.0/Logger.php");
 /** @var Logger|false The log4php logger global */
-$wppp_logger = Logger::getLogger("wppp");
 $config = WPDOWNLOAD_DIR . '/Log4php.config.xml';
+$wppp_logger = Logger::getLogger("wppp");
 if(@file_exists($config)){
-	$wppp_logger->configure(WPDOWNLOAD_DIR . '/Log4php.config.xml');
+	$wppp_logger->configure( $config );
 	$wppp_logger->info("Wordpresss Plugin Packager started");
 }
 else $wppp_logger = false;
